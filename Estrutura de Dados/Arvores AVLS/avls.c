@@ -112,13 +112,14 @@ void aplicarRotacoes(PtrNoAvl *NoAvl){
   int Alt_SubArv_Esq = getAlturaAvl((*NoAvl)->esquerda);
 
   int balanco = Alt_SubArv_Dir - Alt_SubArv_Esq;
+  //printf("Balanco %i %i\n",(*NoAvl)->chave,balanco);
 
-  if(balanco == 2){//rotacao para a esq
+  if(balanco > 1){//rotacao para a esq
     PtrNoAvl temp = (*NoAvl)->direita;
     int tempAD = getAlturaAvl(temp->direita);
     int tempAE = getAlturaAvl(temp->esquerda);
 
-    printf("balanco 2\n");
+
 
 
     if(tempAE > tempAD){
@@ -128,12 +129,12 @@ void aplicarRotacoes(PtrNoAvl *NoAvl){
     }
     return;
 
-  }else if(balanco == -2){//rotacao para a dir
+  }else if(balanco < -1){//rotacao para a dir
     PtrNoAvl temp = (*NoAvl)->esquerda;
     int tempAD = getAlturaAvl(temp->direita);
     int tempAE = getAlturaAvl(temp->esquerda);
 
-    printf("balanco -2\n");
+
 
     if(tempAD > tempAE){
       rotDuplaDir(NoAvl);
@@ -159,7 +160,7 @@ bool inserirAvl(PtrNoAvl *Avl, int x){
   }
 
   if((*Avl)->chave == x){
-    printf("Warning!! Elemento Duplicado\n");
+    printf("Warning!! Elemento %i Duplicado\n",x);
     return false;
   }
 
@@ -207,9 +208,23 @@ void imprimeAvl(PtrNoAvl *Avl){
   if((*Avl) == NULL) return;
 
 
-  printf("%i,",(*Avl)->chave,(*Avl)->altura);
+  printf("%i\n",(*Avl)->chave,(*Avl)->altura);
   imprimeAvl(&((*Avl)->esquerda));
   imprimeAvl(&((*Avl)->direita));
+
+}
+
+void aplicarRotacoes_ALL(PtrNoAvl *NoAvl){
+  if((*NoAvl) == NULL) return;
+
+
+
+  aplicarRotacoes_ALL(&((*NoAvl)->esquerda));
+  aplicarRotacoes_ALL(&((*NoAvl)->direita));
+
+  printf("ROTACAO %i\n",(*NoAvl)->chave);
+  (*NoAvl)->altura = attAlturaAvl(NoAvl);
+  aplicarRotacoes(NoAvl);
 
 }
 
@@ -229,11 +244,23 @@ PtrNoAvl GetMaxArv(PtrNoAvl *NoAvl){
 
   if((*NoAvl)->direita==NULL){
     retorno = (*NoAvl);
-    (*NoAvl) = (*NoAvl)->direita;
     return retorno;
   }
 
-  return GetMaxArv(&(*NoAvl)->direita);
+  GetMaxArv(&(*NoAvl)->direita);
+
+
+}
+
+PtrNoAvl GetMaxArv_PAI(PtrNoAvl *NoAvl){
+  PtrNoAvl retorno;
+
+  if((*NoAvl)->direita->direita==NULL){
+    retorno = (*NoAvl);
+    return retorno;
+  }
+
+  GetMaxArv_PAI(&(*NoAvl)->direita);
 
 
 }
@@ -271,9 +298,22 @@ bool removerArvore(PtrNoAvl *NoAvl, int x){
 
       Aux = GetMaxArv(&(*NoAvl)->esquerda);
       (*NoAvl)->chave = Aux->chave;
+
+
+
+      if((*NoAvl)->esquerda->chave == Aux->chave){
+        (*NoAvl)->esquerda = Aux->esquerda;
+      }else{
+        PtrNoAvl pai = GetMaxArv_PAI(&(*NoAvl)->esquerda);
+        pai->direita = Aux->esquerda;
+
+      }
     }
 
+    Aux = NULL;
     free(Aux);
+
+    aplicarRotacoes_ALL(NoAvl);
     return true;
   }
 
@@ -286,8 +326,6 @@ bool removerArvore(PtrNoAvl *NoAvl, int x){
   else
     remove = (removerArvore(&(*NoAvl)->esquerda,x));
 
-  (*NoAvl)->altura = attAlturaAvl(NoAvl);
-  aplicarRotacoes(NoAvl);
 
 }
 
@@ -301,21 +339,66 @@ int main(){
 
 
   inserirAvl(&raiz,40);
-  inserirAvl(&raiz,30);
-  inserirAvl(&raiz,50);
-  inserirAvl(&raiz,29);
-  inserirAvl(&raiz,31);
-  inserirAvl(&raiz,55);
-  inserirAvl(&raiz,32);
+  inserirAvl(&raiz,20);
+  inserirAvl(&raiz,26);
+  inserirAvl(&raiz,28);
+  inserirAvl(&raiz,36);
+  inserirAvl(&raiz,42);
+  inserirAvl(&raiz,56);
+  inserirAvl(&raiz,14);
+  inserirAvl(&raiz,18);
+  inserirAvl(&raiz,17);
+  inserirAvl(&raiz,90);
+  inserirAvl(&raiz,70);
+  inserirAvl(&raiz,80);
+  inserirAvl(&raiz,75);
+  inserirAvl(&raiz,5);
+  inserirAvl(&raiz,9);
+  inserirAvl(&raiz,8);
+  inserirAvl(&raiz,23);
+  inserirAvl(&raiz,98);
+  inserirAvl(&raiz,82);
+  inserirAvl(&raiz,71);
+  inserirAvl(&raiz,63);
+  inserirAvl(&raiz,11);
+  inserirAvl(&raiz,19);
+  inserirAvl(&raiz,27);
+  inserirAvl(&raiz,33);
+  inserirAvl(&raiz,85);
+  inserirAvl(&raiz,102);
+  inserirAvl(&raiz,120);
+  inserirAvl(&raiz,111);
+  inserirAvl(&raiz,99);
+  inserirAvl(&raiz,101);
+  inserirAvl(&raiz,118);
+  inserirAvl(&raiz,220);
+  inserirAvl(&raiz,300);
+  inserirAvl(&raiz,289);
+  inserirAvl(&raiz,271);
+  inserirAvl(&raiz,122);
+  inserirAvl(&raiz,132);
+  inserirAvl(&raiz,131);
+  inserirAvl(&raiz,146);
+  inserirAvl(&raiz,0);
+  inserirAvl(&raiz,3);
 
-  removerArvore(&raiz,55);//nessa remocao acontece uma rotacao dupla pra direita.
 
-  //já testei a rotação dupla pra esquerda e tmb funcionou
-  //não encontrei nenhum bug na remoção
-  //ambas as rotacoes simples tmb funcionam
 
-  //comparei as impressões pre ordem com o a impressão pre oredem do site: https://www.cs.usfca.edu/~galles/visualization/AVLtree.html
-  //comparei em todos os casos possiveis e funcionou sem bugs (pelo menos nao encontrei). (0bs: o site buga com numeros negativos)
+  removerArvore(&raiz,289);
+  removerArvore(&raiz,271);
+  removerArvore(&raiz,300);
+
+
+  removerArvore(&raiz,70);
+  removerArvore(&raiz,90);
+  removerArvore(&raiz,11);
+  removerArvore(&raiz,19);
+  removerArvore(&raiz,27);
+  removerArvore(&raiz,33);
+  removerArvore(&raiz,85);
+
+
+
 
 
 
